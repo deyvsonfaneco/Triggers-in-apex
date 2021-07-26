@@ -1,6 +1,18 @@
  Triggers conta 
+trigger TriggerConta on Account (before insert, before update, after insert) {
 
+    User usuario = [SELECT Id, Name, IsAdmin__c FROM User WHERE Id = :UserInfo.getUserId()];
 
+    else if(Trigger.isUpdate && Trigger.isBefore){
+        TriggerHandlerConta.ajustarDependenciaConta( Trigger.new, Trigger.old);
+        TriggerHandlerConta.blockAlterarNomeConta( Trigger.new, Trigger.old);
+        TriggerHandlerConta.atualizaStatusConta( Trigger.new, Trigger.old);
+
+    }
+
+}
+
+Métodos Staticos Conta
 
 public without sharing class TriggerHandlerConta {
     
@@ -115,7 +127,30 @@ public without sharing class TriggerHandlerConta {
 
 
     triggers oportunidade /////////////////////////////////////////
+    
+    
+trigger TriggerOportunidade on Opportunity ( before insert, before update, before delete, after insert, after update, after delete, after undelete ) {
 
+		if (Trigger.isBefore) {
+	    	if(Trigger.isInsert){
+				TriggerHandlerOportunidade.naoCriarOpp( Trigger.new );
+				TriggerHandlerOportunidade.bloquearCriarOppVendedor( Trigger.new);
+				
+	    	} else if(Trigger.isUpdate){
+				TriggerHandlerOportunidade.oportunidadeRejeitadaBDR( Trigger.new);
+
+	    	}
+	    
+		} else if (Trigger.isAfter) {
+			if(Trigger.isUpdate){				
+				TriggerHandlerOportunidade.aprovarOportunidade( Trigger.new, Trigger.old );				
+				TriggerHandlerOportunidade.atualizarStatusConta(Trigger.new, Trigger.old);				
+				
+			}
+	   }	     
+}
+
+Métodos Staticos oportunidade
 
     public class TriggerHandlerOportunidade {
   
